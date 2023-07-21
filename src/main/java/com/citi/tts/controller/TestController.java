@@ -19,6 +19,35 @@ public class TestController {
     public CommonResponse addHoliday(@RequestBody AddHolidayVO addHolidayVO) throws Exception{
 
         List<HolidayModel> holidayModels =  CSVUtil.csvReadOperation();
+
+
+        HashMap<String,HolidayModel> holidayModelsMap = new HashMap<>();
+
+        for(HolidayModel holidayModel : holidayModels){
+            holidayModelsMap.put(holidayModel.getCountryCode()+holidayModel.getHolidayDate(),holidayModel);
+        }
+
+        for(HolidayModel holidayModel : addHolidayVO.getHolidayInfoList()){
+            String month = holidayModel.getHolidayDate().substring(5,7);
+            String day = holidayModel.getHolidayDate().substring(8);
+            int monthInt = Integer.parseInt(month);
+            int dayInt = Integer.parseInt(day);
+            if(monthInt<=0||monthInt>=13){
+                return CommonResponse.error("false","month is not legal");
+            }
+
+            if(monthInt<=0||monthInt>=31){
+                return CommonResponse.error("false","day is not legal");
+            }
+
+            if(holidayModelsMap.get(holidayModel.getCountryCode()+holidayModel.getHolidayDate())!=null){
+                return CommonResponse.error("false","the same holiday is exist in this country");
+            }
+        }
+
+
+
+
         holidayModels.addAll(addHolidayVO.getHolidayInfoList());
         List<String[]> inputList = new ArrayList<>();
         for(HolidayModel model : holidayModels){
